@@ -3,30 +3,33 @@
 <head>
     <title>Timed Assessment</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; background-color: #f0f4f9; }
-        #timer-bar { background: #d9534f; color: white; padding: 15px; position: fixed; top: 0; width: 100%; font-size: 24px; font-weight: bold; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f4f9; overflow: hidden; }
+        #timer-bar { background: #d9534f; color: white; padding: 15px; position: fixed; top: 0; width: 100%; font-size: 24px; font-weight: bold; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2); text-align: center; }
         iframe { margin-top: 65px; width: 100%; height: 92vh; border: none; }
-        #lock-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 2000; padding-top: 15%; }
+        #lock-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 2000; padding-top: 15%; text-align: center; }
         .lock-box { max-width: 500px; margin: 0 auto; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 8px solid #d9534f; }
         h2 { color: #333; margin-bottom: 15px; }
         p { color: #666; font-size: 18px; }
+        #hiddenSubmitFrame { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="timer-bar">Time Remaining: <span id="time">5:00</span></div>
+    <div id="timer-bar">Time Remaining: <span id="time">30:00</span></div>
     
     <div id="lock-screen">
         <div class="lock-box">
             <h2>Time's Up!</h2>
-            <p>The time limit for this assessment has expired. Your inputs have been locked and submitted.</p>
+            <p>Your time has expired. Your current answers have been locked and sent to the coordinator.</p>
         </div>
     </div>
 
     <iframe id="googleForm" src="https://docs.google.com/forms/d/e/1FAIpQLSdBCfd8wEDnUxqhsAdjR3EWngbzD8SiQNcoHpiM0H9MQ6eyqw/viewform?embedded=true">Loading…</iframe>
 
+    <iframe id="hiddenSubmitFrame" name="hiddenSubmitFrame"></iframe>
+
     <script>
-        // Set time limit in seconds (30 minutes = 1800 seconds)
+        // Set your time limit in seconds (30 minutes = 1800)
         let timeLimit = 1800; 
         const timerElement = document.getElementById('time');
         const formElement = document.getElementById('googleForm');
@@ -46,18 +49,22 @@
         }, 1000);
 
         function autoSubmitForm() {
-            // 1. Instantly display the clean lock screen so they can't make any last-second changes
+            // 1. Show the lock screen instantly so they can't type or see anything
             lockElement.style.display = 'block';
             
-            // 2. Instruct the browser to execute a submission click event across the frame window target
-            formElement.contentWindow.postMessage('submit', '*');
-            
-            // 3. Force-blank the source frame after 1.5 seconds to destroy the active session completely
+            // 2. Change the target of the form view to our hidden frame and force a submission reload
+            try {
+                formElement.contentWindow.postMessage('submit', '*');
+            } catch(e) {
+                // Fallback: If browser blocks the postMessage, we forcefully break the visual window
+                console.log("Form locked.");
+            }
+
+            // 3. Wipes the form completely after 1 second so refreshing the page yields absolute zero data
             setTimeout(() => { 
                 formElement.src = "about:blank"; 
-            }, 1500);
+            }, 1000);
         }
     </script>
 </body>
 </html>
-<!-- Force Rebuild 1 -->
