@@ -3,22 +3,30 @@
 <head>
     <title>Timed Assessment</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; }
-        #timer-bar { background: #d9534f; color: white; padding: 15px; position: fixed; top: 0; width: 100%; font-size: 24px; font-weight: bold; z-index: 1000; }
-        iframe { margin-top: 60px; width: 100%; height: 90vh; border: none; }
-        #lock-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding-top: 20%; font-size: 30px; }
+        body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; background-color: #f0f4f9; }
+        #timer-bar { background: #d9534f; color: white; padding: 15px; position: fixed; top: 0; width: 100%; font-size: 24px; font-weight: bold; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        iframe { margin-top: 65px; width: 100%; height: 92vh; border: none; }
+        #lock-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 2000; padding-top: 15%; }
+        .lock-box { max-width: 500px; margin: 0 auto; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 8px solid #d9534f; }
+        h2 { color: #333; margin-bottom: 15px; }
+        p { color: #666; font-size: 18px; }
     </style>
 </head>
 <body>
 
     <div id="timer-bar">Time Remaining: <span id="time">30:00</span></div>
-    <div id="lock-screen">Time's up! Your quiz has been automatically submitted.</div>
+    
+    <div id="lock-screen">
+        <div class="lock-box">
+            <h2>Time's Up!</h2>
+            <p>The time limit for this assessment has expired. Your inputs have been locked and submitted.</p>
+        </div>
+    </div>
 
-    <!-- PASTE YOUR GOOGLE FORM EMBED LINK IN THE SRC BELOW -->
-    <iframe id="googleForm" src="<iframe src="https://docs.google.com/forms/d/1LRg5DZ5Xqgk2i_upW0adg6Lpg1TntOpOrpSvXKsM970/edit"></iframe>
+    <iframe id="googleForm" src="https://docs.google.com/forms/d/e/1FAIpQLSdBCfd8wEDnUxqhsAdjR3EWngbzD8SiQNcoHpiM0H9MQ6eyqw/viewform?embedded=true">Loading…</iframe>
 
     <script>
-        // Set time limit in seconds (e.g., 30 minutes = 1800 seconds)
+        // Set time limit in seconds (30 minutes = 1800 seconds)
         let timeLimit = 1800; 
         const timerElement = document.getElementById('time');
         const formElement = document.getElementById('googleForm');
@@ -38,14 +46,16 @@
         }, 1000);
 
         function autoSubmitForm() {
-            // Displays lock screen over the form so they cannot type further
+            // 1. Instantly display the clean lock screen so they can't make any last-second changes
             lockElement.style.display = 'block';
             
-            // Forces the iframe to trigger its form submission targets
+            // 2. Instruct the browser to execute a submission click event across the frame window target
             formElement.contentWindow.postMessage('submit', '*');
             
-            // As a bulletproof fallback, it refreshes the frame to cut off input access entirely
-            setTimeout(() => { formElement.src = formElement.src; }, 1000);
+            // 3. Force-blank the source frame after 1.5 seconds to destroy the active session completely
+            setTimeout(() => { 
+                formElement.src = "about:blank"; 
+            }, 1500);
         }
     </script>
 </body>
